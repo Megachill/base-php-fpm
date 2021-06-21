@@ -1,0 +1,41 @@
+FROM php:7.4-fpm 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+		libmemcached-dev \
+		libz-dev \
+		libpq-dev \
+		libjpeg-dev \
+		libpng-dev \
+		libfreetype6-dev \
+		libssl-dev \
+		libmcrypt-dev \
+        libjpeg62-turbo-dev \
+        libxml2-dev \
+        libzip-dev \
+        bash \
+        nano \
+        dos2unix \
+    && rm -rf /var/lib/apt/lists/*
+
+    # && docker-php-ext-install -j$(nproc) iconv pdo pdo_mysql\
+    # && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+    # && docker-php-ext-install -j$(nproc) gd \
+    # && docker-php-ext-install exif mysqli mbstring pdo pdo_mysql bcmath sockets tokenizer xml zip \
+    # && apt-get clean -y
+RUN docker-php-ext-install -j$(nproc) iconv pdo pdo_mysql
+# RUN docker-php-ext-install pdo_pgsql
+RUN docker-php-ext-configure gd \
+	--with-jpeg=/usr/include \
+	--with-freetype=/usr/include
+RUN docker-php-ext-install gd
+
+RUN docker-php-ext-install exif pdo pdo_mysql bcmath sockets tokenizer xml zip
+
+RUN pecl install -o -f redis \
+&&  rm -rf /tmp/pear \
+&&  docker-php-ext-enable redis
+
+COPY fix-permission /bin/
+RUN chmod +x /bin/fix-permission
+
+WORKDIR /var/www/html/
