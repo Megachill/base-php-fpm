@@ -49,6 +49,7 @@ RUN set -xe \
         iconv \
         mysqli \
         pdo \
+        # ldap \
         pdo_mysql \
         pdo_sqlite \
         pdo_pgsql \
@@ -73,6 +74,15 @@ RUN set -xe \
     # && docker-php-ext-enable gd \
     && apk del .build-deps \
     && rm -rf /tmp/* /var/cache/apk/*
+
+# Setup LDAP
+# RUN apk add ldb-dev libldap openldap-dev
+# RUN docker-php-ext-configure ldap --prefix=/usr/local/php --with-ldap=/usr/lib/i386-linux-gnu
+# RUN docker-php-ext-install ldap
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/bin/
+
+# Install PHP extensions
+RUN install-php-extensions ldap
 
 # Setup GD
 RUN apk add --no-cache \
